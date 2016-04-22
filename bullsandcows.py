@@ -8,8 +8,10 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
+from kivy.uix.popup import Popup
 from kivy.graphics import *
 from kivy.properties import NumericProperty
+import re
 
 import bullsandcowslogic
 
@@ -24,8 +26,27 @@ class BullsAndCows(RelativeLayout):
 		values = self.ids.values()
 		textinput = values[0].__self__
 		widget = values[1].__self__
-		widget.button_pressed(textinput.text)
+		result = self.validate_textinput(textinput.text)
+		if result:
+			widget.button_pressed(textinput.text)
+		else:
+			message = "Invalid guess '{}'. Must be 4 unique digits not starting with 0".format(textinput.text)
+			popup = Popup(title='Invalid guess',
+				content=Label(text=message),
+				size_hint=(0.6, 0.6),
+				)
+			popup.open()
+
 		textinput.text = ""
+
+	def validate_textinput(self, text_input):
+		#print(text_input)
+		validtext = re.match('([1-9])(?!.*\\1)([0-9])(?!.*\\2)([0-9])(?!.*\\3)([0-9])(?!.*\\4)$', text_input)
+		if (validtext == None):
+			return False
+		else:
+			#print(validtext.groups())
+			return True
 
 class BullsAndCowsMainWidget(GridLayout):
 	tries = NumericProperty(0)
